@@ -1,0 +1,69 @@
+import SwiftUI
+
+/// Drag-to-draw rectangle overlay for defining a ROI on top of the live camera preview.
+/// `roi` is normalized (0...1, origin top-left) relative to the view's own bounds.
+struct ROISelectionView: View {
+    let title: String
+    @Binding var roi: CGRect
+    let overlayColor: Color
+
+    @State private var dragStart: CGPoint?
+    @State private var currentRect: CGRect?
+
+    var body: some View {
+        GeometryReader { geo in
+            let rect = displayRect(in: geo.size)
+
+            ZStack(alignment: .topLeading) {
+                Color.clear
+
+                Rectangle()
+                    .stroke(overlayColor, lineWidth: 2)
+                    .background(overlayColor.opacity(0.15))
+                    .frame(width: max(0, rect.width), height: max(0, rect.height))
+                    .position(x: rect.midX, y: rect.midY)
+
+                VStack {
+                    Text(title)
+                        .font(.caption.bold())
+                        .padding(6)
+                        .background(.black.opacity(0.6))
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .padding(8)
+                    Spacer()
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 4)
+                    .onChanged { value in
+                        if dragStart == nil { dragStart = value.startLocation }
+                        guard let start = dragStart else { return }
+                        currentRect = CGRect(
+                            x: min(start.x, value.location.x),
+                            y: min(start.y, value.location.y),
+                            width: abs(value.location.x - start.x),
+                            height: abs(value.location.y - start.y)
+                        )
+                    }
+                    .onEnded { _ in
+                        guard let drawn = currentRect, geo.size.width > 0, geo.size.height > 0 else { return }
+                        roi = CGRect(
+                            x: drawn.minX / geo.size.width,
+                            y: drawn.minY / geo.size.height,
+                            width: drawn.width / geo.size.width,
+                            height: drawn.height / geo.size.height
+                        )
+                        dragStart = nil
+                        currentRect = nil
+                    }
+            )
+        }
+    }
+
+    private func displayRect(in size: CGSize) -> CGRect {
+        if let currentRect { return currentRect }
+        return CGRect(x: roi.minX * size.width, y: roi.minY * size.height, width: roi.width * size.width, height: roi.height * size.height)
+    }
+}
