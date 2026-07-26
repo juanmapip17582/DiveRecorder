@@ -41,6 +41,29 @@ amigo + un iPhone físico. Por eso:
 Después de este primer cable, si Mac e iPhone están en la misma red WiFi, Xcode permite debug
 inalámbrico (Window → Devices and Simulators → marcar "Connect via network").
 
+## Si quien tiene la Mac usa Claude Code
+
+Este código se escribió desde Windows sin poder compilarlo ni una vez, así que es esperable que
+la primera build tenga algún error. Si la persona con la Mac tiene Claude Code instalado, puede
+validar (y arreglar) la compilación de forma independiente, sin necesitar el iPhone conectado ni
+pasar capturas de pantalla de un lado a otro:
+
+```
+git clone https://github.com/juanmapip17582/DiveRecorder.git
+cd DiveRecorder
+xcodegen generate
+claude
+```
+
+Y dentro de esa sesión de Claude Code (que arranca sin memoria de ninguna conversación previa,
+pero con suficiente contexto leyendo este README y `SPEC.md`):
+
+> Compila este proyecto de iOS contra el Simulator (`xcodebuild`), arregla cualquier error de
+> compilación que encuentres, y cuando compile limpio haz commit y push a GitHub.
+
+Esto resuelve el "¿compila o no?" antes de siquiera juntarse con el iPhone — la sesión con el
+teléfono conectado queda solo para probar el comportamiento real (detección, grabación, splash).
+
 ## Actualizar cuando hay cambios de código
 
 ```
