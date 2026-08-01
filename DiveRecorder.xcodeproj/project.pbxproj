@@ -1,0 +1,436 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		007E6007694C1B805405E401 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABB368BD221F4EE4B7A8CBB /* ContentView.swift */; };
+		05EAB9B06C480EA7C6AB6542 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E9B92226E1BFAE9FFF16AA4 /* CameraPreviewView.swift */; };
+		1CAB76F3F3294C7E1A5BC7CC /* CaptureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 464420CDCB48531B07D19480 /* CaptureManager.swift */; };
+		47193EFD2BF57250435FD620 /* ClipLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C40B13FDE65B81FE53D52E /* ClipLibraryView.swift */; };
+		49072DC4D711A738C4D94D67 /* ColorMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE73173A0387FDDF36835175 /* ColorMatcher.swift */; };
+		62CE47F9C1E34AEA88A053C1 /* PoseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7145883198727838323DB1CF /* PoseDetector.swift */; };
+		64FBE1497A99810DC1AF068D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F65347D411DC020B7EA9A3D /* Geometry.swift */; };
+		7E3335F69332689F95CA82FE /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F41590E1737E8A104352D7 /* CalibrationView.swift */; };
+		82F95F42A5EF2096AD8B8942 /* ClipStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF367D2F554ACAAD9CAED0 /* ClipStorage.swift */; };
+		8E6F97090137F01E5C0C80D5 /* AudioMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */; };
+		AA8C571BB2171E8354A6F91E /* RecordingStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06B44CEFB880A88FFD5093A /* RecordingStateMachine.swift */; };
+		B2BDA171F0BB67B52FCA825E /* ROISelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D4BCAA6D2FCE8C31C19677 /* ROISelectionView.swift */; };
+		BAA545B71B2836861CB1BFD2 /* DiveRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FABB439714886B45FBE4FEA /* DiveRecorderApp.swift */; };
+		C60DFE5BB347241123350047 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F2772E4568344F4C86274F67 /* Assets.xcassets */; };
+		D0A143DDEE2C3AF15DA266EF /* CalibrationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED787CCB512FC95611ED7E4C /* CalibrationSettings.swift */; };
+		E6A255AD5268D71BC947F66C /* SplashDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45E0906C088037B47653550 /* SplashDetector.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0FABB439714886B45FBE4FEA /* DiveRecorderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveRecorderApp.swift; sourceTree = "<group>"; };
+		26D4BCAA6D2FCE8C31C19677 /* ROISelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROISelectionView.swift; sourceTree = "<group>"; };
+		464420CDCB48531B07D19480 /* CaptureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureManager.swift; sourceTree = "<group>"; };
+		508A840F0BF37432BCFE8F18 /* DiveRecorder.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DiveRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		53F41590E1737E8A104352D7 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
+		6ABB368BD221F4EE4B7A8CBB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		70C40B13FDE65B81FE53D52E /* ClipLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipLibraryView.swift; sourceTree = "<group>"; };
+		7145883198727838323DB1CF /* PoseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseDetector.swift; sourceTree = "<group>"; };
+		7E9B92226E1BFAE9FFF16AA4 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		8F65347D411DC020B7EA9A3D /* Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
+		BE73173A0387FDDF36835175 /* ColorMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorMatcher.swift; sourceTree = "<group>"; };
+		C06B44CEFB880A88FFD5093A /* RecordingStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingStateMachine.swift; sourceTree = "<group>"; };
+		D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMonitor.swift; sourceTree = "<group>"; };
+		E45E0906C088037B47653550 /* SplashDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashDetector.swift; sourceTree = "<group>"; };
+		ED787CCB512FC95611ED7E4C /* CalibrationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationSettings.swift; sourceTree = "<group>"; };
+		F2772E4568344F4C86274F67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FDDF367D2F554ACAAD9CAED0 /* ClipStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipStorage.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		134B4A46BA389F11EEF0B8AF = {
+			isa = PBXGroup;
+			children = (
+				FD4A70708886AFC996045335 /* DiveRecorder */,
+				476EB88FA196C0588F36D79F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		21541DF226FC25EDEEB34F21 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				6ABB368BD221F4EE4B7A8CBB /* ContentView.swift */,
+				0FABB439714886B45FBE4FEA /* DiveRecorderApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		263480C46F5ED02442BF8726 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F2772E4568344F4C86274F67 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		2D34D5A098FF5D223810FA51 /* Calibration */ = {
+			isa = PBXGroup;
+			children = (
+				ED787CCB512FC95611ED7E4C /* CalibrationSettings.swift */,
+				53F41590E1737E8A104352D7 /* CalibrationView.swift */,
+				26D4BCAA6D2FCE8C31C19677 /* ROISelectionView.swift */,
+			);
+			path = Calibration;
+			sourceTree = "<group>";
+		};
+		476EB88FA196C0588F36D79F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				508A840F0BF37432BCFE8F18 /* DiveRecorder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4B0ACF43B9D72125745864C9 /* SplashDetection */ = {
+			isa = PBXGroup;
+			children = (
+				E45E0906C088037B47653550 /* SplashDetector.swift */,
+			);
+			path = SplashDetection;
+			sourceTree = "<group>";
+		};
+		522DD8A65DC95C8074481A50 /* Vision */ = {
+			isa = PBXGroup;
+			children = (
+				BE73173A0387FDDF36835175 /* ColorMatcher.swift */,
+				7145883198727838323DB1CF /* PoseDetector.swift */,
+			);
+			path = Vision;
+			sourceTree = "<group>";
+		};
+		5C0C30C0EA9275FA100BA45B /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */,
+				464420CDCB48531B07D19480 /* CaptureManager.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		6008289FA06E1035E2428B4C /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				70C40B13FDE65B81FE53D52E /* ClipLibraryView.swift */,
+				FDDF367D2F554ACAAD9CAED0 /* ClipStorage.swift */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		B8F865104841A5574B4C8732 /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				7E9B92226E1BFAE9FFF16AA4 /* CameraPreviewView.swift */,
+				8F65347D411DC020B7EA9A3D /* Geometry.swift */,
+			);
+			path = Supporting;
+			sourceTree = "<group>";
+		};
+		E1E314CD9CC9B70F4AACE828 /* StateMachine */ = {
+			isa = PBXGroup;
+			children = (
+				C06B44CEFB880A88FFD5093A /* RecordingStateMachine.swift */,
+			);
+			path = StateMachine;
+			sourceTree = "<group>";
+		};
+		FD4A70708886AFC996045335 /* DiveRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				21541DF226FC25EDEEB34F21 /* App */,
+				2D34D5A098FF5D223810FA51 /* Calibration */,
+				5C0C30C0EA9275FA100BA45B /* Camera */,
+				6008289FA06E1035E2428B4C /* Library */,
+				263480C46F5ED02442BF8726 /* Resources */,
+				4B0ACF43B9D72125745864C9 /* SplashDetection */,
+				E1E314CD9CC9B70F4AACE828 /* StateMachine */,
+				B8F865104841A5574B4C8732 /* Supporting */,
+				522DD8A65DC95C8074481A50 /* Vision */,
+			);
+			path = DiveRecorder;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		533754748D96E4CC4EBD5E4D /* DiveRecorder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F87AE77A4FDA9E36E8847DA /* Build configuration list for PBXNativeTarget "DiveRecorder" */;
+			buildPhases = (
+				F251E5FB9416E851F1FA3AA8 /* Sources */,
+				7B012A7AB9548BCECA1D55C0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DiveRecorder;
+			packageProductDependencies = (
+			);
+			productName = DiveRecorder;
+			productReference = 508A840F0BF37432BCFE8F18 /* DiveRecorder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3CEB812F4F3BF64D6FD520C7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					533754748D96E4CC4EBD5E4D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 50916480E74D69E9864C218E /* Build configuration list for PBXProject "DiveRecorder" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 134B4A46BA389F11EEF0B8AF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 476EB88FA196C0588F36D79F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				533754748D96E4CC4EBD5E4D /* DiveRecorder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7B012A7AB9548BCECA1D55C0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C60DFE5BB347241123350047 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F251E5FB9416E851F1FA3AA8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E6F97090137F01E5C0C80D5 /* AudioMonitor.swift in Sources */,
+				D0A143DDEE2C3AF15DA266EF /* CalibrationSettings.swift in Sources */,
+				7E3335F69332689F95CA82FE /* CalibrationView.swift in Sources */,
+				05EAB9B06C480EA7C6AB6542 /* CameraPreviewView.swift in Sources */,
+				1CAB76F3F3294C7E1A5BC7CC /* CaptureManager.swift in Sources */,
+				47193EFD2BF57250435FD620 /* ClipLibraryView.swift in Sources */,
+				82F95F42A5EF2096AD8B8942 /* ClipStorage.swift in Sources */,
+				49072DC4D711A738C4D94D67 /* ColorMatcher.swift in Sources */,
+				007E6007694C1B805405E401 /* ContentView.swift in Sources */,
+				BAA545B71B2836861CB1BFD2 /* DiveRecorderApp.swift in Sources */,
+				64FBE1497A99810DC1AF068D /* Geometry.swift in Sources */,
+				62CE47F9C1E34AEA88A053C1 /* PoseDetector.swift in Sources */,
+				B2BDA171F0BB67B52FCA825E /* ROISelectionView.swift in Sources */,
+				AA8C571BB2171E8354A6F91E /* RecordingStateMachine.swift in Sources */,
+				E6A255AD5268D71BC947F66C /* SplashDetector.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1F0E886B11F6A3D4361AA463 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = DiveRecorder/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.juanma.diverecorder;
+				PRODUCT_NAME = DiveRecorder;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4BC9DC22122AAD75217867F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		683FD56F874E5763B7F0D1AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		69BA0E138F783EA087BD3B9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = DiveRecorder/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.juanma.diverecorder;
+				PRODUCT_NAME = DiveRecorder;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		50916480E74D69E9864C218E /* Build configuration list for PBXProject "DiveRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4BC9DC22122AAD75217867F6 /* Debug */,
+				683FD56F874E5763B7F0D1AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8F87AE77A4FDA9E36E8847DA /* Build configuration list for PBXNativeTarget "DiveRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				69BA0E138F783EA087BD3B9E /* Debug */,
+				1F0E886B11F6A3D4361AA463 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3CEB812F4F3BF64D6FD520C7 /* Project object */;
+}
