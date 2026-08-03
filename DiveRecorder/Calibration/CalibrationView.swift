@@ -2,16 +2,14 @@ import SwiftUI
 import Vision
 import CoreVideo
 
-/// One-time-per-mount calibration screen: draw the trampoline/platform ROI and water ROI over
-/// the live preview, capture the reference shorts color, and tune every threshold the spec
-/// flags as "measure in the real pool, don't guess" — all persisted immediately via
-/// `CalibrationStore`, no rebuild needed to iterate.
+/// One-time-per-mount calibration screen: draw the trampoline/platform ROI over the live
+/// preview, capture the reference shorts color, and tune every threshold the spec flags as
+/// "measure in the real pool, don't guess" — all persisted immediately via `CalibrationStore`,
+/// no rebuild needed to iterate.
 struct CalibrationView: View {
     @ObservedObject var calibrationStore: CalibrationStore
     @ObservedObject var captureManager: CaptureManager
 
-    private enum EditingROI { case trampoline, water }
-    @State private var editingROI: EditingROI = .trampoline
     @State private var captureFeedback: String?
 
     private let poseDetector = PoseDetector()
@@ -19,26 +17,16 @@ struct CalibrationView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Regiones de interés") {
-                    Picker("Editando", selection: $editingROI) {
-                        Text("Trampolín/plataforma").tag(EditingROI.trampoline)
-                        Text("Agua").tag(EditingROI.water)
-                    }
-                    .pickerStyle(.segmented)
-
+                Section("Región de interés — Trampolín/plataforma") {
                     ZStack {
-                        CameraPreviewView(session: captureManager.session)
+                        CameraPreviewView(captureManager: captureManager)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        if editingROI == .trampoline {
-                            ROISelectionView(title: "Trampolín", roi: $calibrationStore.settings.trampolineROI, overlayColor: .yellow)
-                        } else {
-                            ROISelectionView(title: "Agua", roi: $calibrationStore.settings.waterROI, overlayColor: .blue)
-                        }
+                        ROISelectionView(title: "Trampolín", roi: $calibrationStore.settings.trampolineROI, overlayColor: .yellow)
                     }
                     .frame(height: 320)
 
-                    Text("Arrastra sobre la vista para dibujar el rectángulo de \(editingROI == .trampoline ? "el trampolín" : "el agua").")
+                    Text("Arrastra sobre la vista para dibujar el rectángulo del trampolín.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -72,15 +60,17 @@ struct CalibrationView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("Detección de splash") {
-                    Toggle("Usar señal visual", isOn: $calibrationStore.settings.useSplashVisualSignal)
-                    LabeledSlider(label: "Umbral de movimiento", value: $calibrationStore.settings.splashMotionThreshold, range: 0.01...0.5, format: "%.2f")
+                Section("Fin de grabación") {
+                    LabeledSlider(label: "Tiempo de vuelo", value: $calibrationStore.settings.flightTimeSeconds, range: 1...8, format: "%.1f s")
+                    Text("Cuenta regresiva fija desde que deja de detectarse a la persona en el trampolín hasta que se corta la grabación.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                    Toggle("Usar señal de audio", isOn: $calibrationStore.settings.useSplashAudioSignal)
-                    LabeledSlider(label: "Umbral de audio", value: $calibrationStore.settings.splashAudioThreshold, range: 0.01...1.0, format: "%.2f")
-
-                    LabeledSlider(label: "Padding posterior", value: $calibrationStore.settings.postSplashPaddingSeconds, range: 0...3, format: "%.2f s")
                     LabeledSlider(label: "Timer failsafe", value: $calibrationStore.settings.recordingFailsafeSeconds, range: 3...15, format: "%.1f s")
+                    Text("Respaldo por si nunca se detecta que salió del trampolín.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     LabeledSlider(label: "FPS de grabación", value: $calibrationStore.settings.recordingFPS, range: 24...60, format: "%.0f fps")
                 }
 

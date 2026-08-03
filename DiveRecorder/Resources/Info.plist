@@ -24,8 +24,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>DiveRecorder necesita la cámara para grabar automáticamente tus clavados durante el entrenamiento.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>DiveRecorder usa el micrófono para detectar el sonido del splash y saber cuándo terminar la grabación.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>DiveRecorder guarda tus clavados en Fotos cuando tocas "Descargar" en un clip.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>

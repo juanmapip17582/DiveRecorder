@@ -18,12 +18,16 @@ Grabar automáticamente los clavados de Juan Manuel durante entrenamiento en equ
 **3. ARMADO → GRABANDO**
 - Arranca grabación a framerate completo (30/60fps, para poder ver en cámara lenta después)
 
-**4. DETECCIÓN DE SPLASH (mientras graba)**
-- ROI secundaria: zona del agua bajo el trampolín/plataforma
-- Señal visual: diferencia de frames / energía de movimiento en esa ROI (pico brusco = splash)
-- Señal de audio complementaria: pico de amplitud + transiente de banda ancha, vía tap en el buffer de `AVAudioEngine`
-- Cuando la señal (visual, audio, o ambas — a definir según qué tan confiable resulte en pruebas) cruza el umbral → corta con un padding posterior de 0.5-1s
-- Failsafe: timer máximo (6-8s) por si el splash no se detecta, para no grabar indefinidamente
+**4. FIN DE GRABACIÓN (mientras graba)**
+- `PoseDetector` sigue corriendo sobre el ROI del trampolín/plataforma (a una fracción de los
+  frames, no todos, para no competir con la codificación del video)
+- Cuando deja de detectar a la persona ahí durante 2-3 frames analizados seguidos (evita
+  falsos positivos por un parpadeo momentáneo de la detección) → marca ese instante como
+  "salió del trampolín" y arranca una cuenta regresiva fija ("Tiempo de vuelo", ajustable en
+  Calibración, 3.5s por defecto)
+- Al cumplirse la cuenta regresiva → corta la grabación
+- Failsafe: timer máximo (ajustable en Calibración, 7s por defecto) por si nunca se detecta la
+  salida del trampolín, para no grabar indefinidamente
 
 **5. Guarda el clip localmente → vuelve a STANDBY**
 
@@ -31,33 +35,29 @@ Grabar automáticamente los clavados de Juan Manuel durante entrenamiento en equ
 
 **Captura**
 - `AVCaptureSession` con `AVCaptureVideoDataOutput` para inspeccionar frames en vivo + grabación a archivo (`AVAssetWriter` si necesitas control fino sobre qué frames exactos se guardan)
-- `AVAudioEngine` con tap en el input del micrófono, en paralelo
+- Un único `AVCaptureVideoPreviewLayer` compartido entre la pantalla principal y la de
+  Calibración (reparentado, no recreado, entre una y otra)
 
-**Detección de pose (standby)**
+**Detección de pose (standby, identificando y mientras graba)**
 - Corre directo sobre el `CVPixelBuffer` del delegate de `AVCaptureVideoDataOutput`, sin pasar por disco
 - Filtra detecciones fuera de la ROI calibrada
+- Mientras graba, corre a una fracción de los frames (no todos), solo para saber si la persona
+  sigue en el ROI del trampolín
 
 **Calibración (una sola vez, al montar la cámara)**
-- Pantalla donde defines: (a) rectángulo ROI del trampolín/plataforma, (b) rectángulo ROI del agua, (c) foto de la pantaloneta para fijar el color de referencia
+- Pantalla donde defines: (a) rectángulo ROI del trampolín/plataforma, (b) foto de la pantaloneta para fijar el color de referencia
 
 **Identificación por color**
 - Crop torso-piernas con keypoints de Vision → conversión a HSV (más robusto que RGB a cambios de luz de la piscina) → distancia de histograma contra la referencia
-
-**Detección de splash**
-- Frame differencing simple en la ROI del agua (no requiere ML, con Accelerate/vDSP basta)
-- Audio: energía RMS del buffer + detección de onset
 
 ## Estructura de proyecto sugerida
 ```
 DiveRecorder/
 ├── Camera/
-│   ├── CaptureManager.swift       (AVCaptureSession + delegates)
-│   └── AudioMonitor.swift         (AVAudioEngine tap)
+│   └── CaptureManager.swift       (AVCaptureSession + delegates + preview layer compartido)
 ├── Vision/
 │   ├── PoseDetector.swift         (VNDetectHumanBodyPoseRequest wrapper)
 │   └── ColorMatcher.swift         (HSV histogram matching)
-├── SplashDetection/
-│   └── SplashDetector.swift       (frame diff + audio onset)
 ├── StateMachine/
 │   └── RecordingStateMachine.swift
 ├── Calibration/
@@ -69,8 +69,7 @@ DiveRecorder/
 ## Parámetros a afinar con pruebas reales (medir, no adivinar)
 - Frecuencia de muestreo en standby (arrancar en 2-3fps, ajustar según consumo real de batería)
 - Umbral de similitud de color (la luz de la piscina altera el color percibido — probar en la piscina real, no en casa)
-- Umbral de energía de movimiento/audio para el splash
-- Padding post-splash
+- Tiempo de vuelo (cuenta regresiva fija desde que sale del trampolín hasta cortar)
 - Timer failsafe
 
 ## Restricción de iOS a tener presente

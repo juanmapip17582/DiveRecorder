@@ -76,36 +76,46 @@ Luego build & run de nuevo en Xcode.
 
 ```
 DiveRecorder/
-├── App/                 SwiftUI entry point + pantalla principal (preview + estado)
-├── Camera/              AVCaptureSession (CaptureManager) + AVAudioEngine tap (AudioMonitor)
+├── App/                 SwiftUI entry point + pantalla principal (preview + estado + overlay debug)
+├── Camera/              AVCaptureSession + preview layer compartido (CaptureManager)
 ├── Vision/               VNDetectHumanBodyPoseRequest (PoseDetector) + matching HSV (ColorMatcher)
-├── SplashDetection/     Frame differencing en la ROI del agua (SplashDetector)
 ├── StateMachine/        Orquestador: STANDBY -> IDENTIFICANDO -> ARMADO -> GRABANDO -> STANDBY
-├── Calibration/         ROIs, color de referencia y sliders de todos los umbrales ajustables
-├── Library/              Guardado/listado de clips grabados
+├── Calibration/         ROI, color de referencia y sliders de todos los umbrales ajustables
+├── Library/              Guardado/listado de clips grabados + descarga a Fotos
 └── Resources/           Info.plist, Assets.xcassets
 ```
 
 ## Flujo de calibración en la app
 
-1. Abrir la app, dar permiso de cámara/micrófono.
+1. Abrir la app, dar permiso de cámara.
 2. Tocar el ícono de sliders (calibración).
-3. Dibujar (arrastrando sobre el preview) el ROI del trampolín/plataforma y el ROI del agua.
+3. Dibujar (arrastrando sobre el preview) el ROI del trampolín/plataforma.
 4. Pararse dentro del ROI del trampolín con la pantaloneta puesta y tocar "Capturar color
    ahora".
-5. Ajustar los sliders de umbral (color, movimiento de splash, audio, padding, failsafe, fps)
-   según lo que se observe en pruebas reales — todo se guarda solo.
+5. Ajustar los sliders de umbral (color, tiempo de vuelo, failsafe, fps) según lo que se observe
+   en pruebas reales — todo se guarda solo.
 
 ## Notas técnicas
 
-- Grabación vía `AVCaptureMovieFileOutput` (mux de audio+video automático) en vez de
-  `AVAssetWriter` manual — más simple para v1; si más adelante hace falta control cuadro a
-  cuadro, ese es el upgrade natural.
-- El audio de splash se captura por separado vía `AVAudioEngine` (no por el output de audio de
-  la sesión de captura), para poder calcular energía/onset en tiempo real sin pasar por disco.
+- Grabación vía `AVCaptureMovieFileOutput` en vez de `AVAssetWriter` manual — más simple para
+  v1; si más adelante hace falta control cuadro a cuadro, ese es el upgrade natural. La sesión
+  no tiene input de audio, así que los clips se graban sin sonido.
+- Fin de grabación: mientras GRABANDO, `PoseDetector` sigue vigilando el ROI del trampolín (a
+  una fracción de los frames, no todos — ver `RecordingStateMachine.recordingFrameStride`). En
+  cuanto deja de detectar a la persona ahí por unos frames seguidos (para no dispararse con un
+  parpadeo momentáneo), arranca la cuenta regresiva fija de "Tiempo de vuelo" y corta al
+  cumplirse. El timer failsafe de Calibración sigue como respaldo, por si la salida nunca se
+  detecta.
+- `CaptureManager` expone un único `AVCaptureVideoPreviewLayer` compartido; `CameraPreviewView`
+  lo reparenta entre la pantalla principal y la de Calibración en vez de crear una capa nueva
+  cada vez — evita tanto que la vista principal se quede en negro al volver de Calibración como
+  la demora al abrirla (antes negociaba una conexión de AVFoundation nueva cada vez).
+- Los clips se guardan en `Documents/Clips/` dentro del sandbox de la app (ver `ClipStorage`) —
+  no son visibles fuera de la app hasta que se tocan "Descargar" en la Librería, que los copia a
+  Fotos vía `PHPhotoLibrary` (`NSPhotoLibraryAddUsageDescription`, acceso solo de escritura).
 - Todas las decisiones de la máquina de estados corren en una cola serial propia
   (`RecordingStateMachine.stateQueue`), separada de las colas de AVFoundation, para evitar
-  condiciones de carrera entre los distintos callbacks (frames de video, fin de grabación, audio).
+  condiciones de carrera entre los distintos callbacks (frames de video, fin de grabación).
 - Bundle id / nombre están en `project.yml` (`com.juanma.diverecorder` / `DiveRecorder`) —
   cambiar ahí si hace falta, no en Xcode directamente (se pierde al regenerar).
 

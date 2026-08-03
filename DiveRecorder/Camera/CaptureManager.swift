@@ -7,11 +7,17 @@ protocol CaptureFrameDelegate: AnyObject {
 }
 
 /// Owns the AVCaptureSession: a video data output for live frame inspection (pose detection in
-/// standby, splash frame-diff while recording) and a movie file output for the actual
-/// full-quality recording. Both share the same session/input, so live analysis and recording
-/// run concurrently without duplicating capture.
+/// standby/identifying/recording) and a movie file output for the actual full-quality
+/// recording. Both share the same session/input, so live analysis and recording run
+/// concurrently without duplicating capture.
 final class CaptureManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
+
+    /// Single preview layer shared by every screen that shows the live camera feed (the
+    /// recording screen, and Calibration's own ROI-drawing preview). `CameraPreviewView`
+    /// reparents this same layer into whichever host view is currently on screen instead of
+    /// each screen creating its own layer/connection — see the comment there for why.
+    let previewLayer: AVCaptureVideoPreviewLayer
 
     weak var frameDelegate: CaptureFrameDelegate?
 
@@ -26,6 +32,12 @@ final class CaptureManager: NSObject, ObservableObject {
     private var videoDevice: AVCaptureDevice?
     private var recordingCompletion: ((URL?) -> Void)?
     private var singleFrameCompletion: ((CVPixelBuffer?) -> Void)?
+
+    override init() {
+        previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        super.init()
+    }
 
     func requestAccessAndConfigure() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in

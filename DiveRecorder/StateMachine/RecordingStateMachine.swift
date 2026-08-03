@@ -9,65 +9,86 @@ enum DiveRecorderState: String {
     case recording
 }
 
-/// Orchestrates the 5-state flow from the spec: STANDBY -> IDENTIFICANDO -> ARMADO -> GRABANDO
-/// -> (splash or failsafe) -> STANDBY. Ties together CaptureManager (frames + recording),
-/// AudioMonitor (splash audio signal), PoseDetector, ColorMatcher and SplashDetector.
+/// Orchestrates the 4-state flow: STANDBY -> IDENTIFICANDO -> ARMADO -> GRABANDO -> (board-exit
+/// countdown, or failsafe) -> STANDBY. Ties together CaptureManager (frames + recording),
+/// PoseDetector and ColorMatcher.
 final class RecordingStateMachine: ObservableObject {
     @Published private(set) var state: DiveRecorderState = .standby
     @Published private(set) var lastClipURL: URL?
 
+    /// Debug-overlay-facing: whether the trampoline ROI currently has a detected person while
+    /// recording. `true` outside `.recording` and right after entering it, until a miss streak
+    /// proves otherwise.
+    @Published private(set) var isPersonDetectedInROI: Bool = true
+    /// Debug-overlay-facing: when the person was confirmed to have left the trampoline ROI
+    /// (`missedFrameThreshold` consecutive misses) during the current recording. `nil` while
+    /// still detected, or outside `.recording`.
+    @Published private(set) var boardExitAt: Date?
+
     private let captureManager: CaptureManager
-    private let audioMonitor: AudioMonitor
     private let poseDetector = PoseDetector()
-    private let splashDetector = SplashDetector()
     private let calibrationStore: CalibrationStore
     private let clipStorage: ClipStorage
 
     /// Serializes every state read/mutation and all frame-processing decisions, so callbacks
-    /// arriving from different AVFoundation queues (video data output, movie file output,
-    /// audio tap) never race with each other. `state` above is only ever written from here via
-    /// a hop to the main thread, and is never read back for decision-making — decisions always
-    /// go through `processingState`, which only this queue touches.
+    /// arriving from different AVFoundation queues (video data output, movie file output) never
+    /// race with each other. `state` above is only ever written from here via a hop to the main
+    /// thread, and is never read back for decision-making — decisions always go through
+    /// `processingState`, which only this queue touches.
     private let stateQueue = DispatchQueue(label: "com.diverecorder.statemachine")
 
     private var processingState: DiveRecorderState = .standby
     private var identifyingStartedAt: Date?
-    private var splashDetectedAt: Date?
-    private var currentAudioEnergy: Double = 0
     private var failsafeWorkItem: DispatchWorkItem?
-    private var paddingWorkItem: DispatchWorkItem?
+    private var flightCountdownWorkItem: DispatchWorkItem?
+
+    /// stateQueue-only mirror of `boardExitAt`: `nil` means still watching for the exit,
+    /// non-nil means the countdown is already committed and evaluation should stop. Reading
+    /// `@Published` state from a background queue isn't safe, hence the separate mirror — same
+    /// pattern as `state`/`processingState`.
+    private var processingBoardExitAt: Date?
+    /// stateQueue-only mirror of `isPersonDetectedInROI`, used purely to detect edges so we only
+    /// hop to the main thread when the value actually changes.
+    private var processingIsPersonDetected = true
+    private var consecutiveMissedFrames = 0
+    /// Consecutive *analyzed* frames (see `recordingFrameStride`) without a detected person in
+    /// the ROI before we consider the diver to have left — 2-3 per the spec, to absorb a single
+    /// momentary miss (motion blur mid-jump, a brief occlusion) without cutting the countdown
+    /// short on a false alarm.
+    private static let missedFrameThreshold = 3
+
+    /// Running VNDetectHumanBodyPoseRequest on every single frame at full recording fps (up to
+    /// 60/s) would compete heavily with the actual video encoding for CPU. This only analyzes
+    /// every Nth frame delivered to the video data output while recording — the recorded movie
+    /// itself is untouched by this (AVCaptureMovieFileOutput gets every frame regardless); only
+    /// the parallel analysis stream is throttled.
+    private static let recordingFrameStride = 4
+    private var recordingFrameCounter = 0
 
     private var settings: CalibrationSettings { calibrationStore.settings }
 
     init(
         captureManager: CaptureManager,
-        audioMonitor: AudioMonitor,
         calibrationStore: CalibrationStore = .shared,
         clipStorage: ClipStorage = ClipStorage()
     ) {
         self.captureManager = captureManager
-        self.audioMonitor = audioMonitor
         self.calibrationStore = calibrationStore
         self.clipStorage = clipStorage
 
         captureManager.frameDelegate = self
-        audioMonitor.onEnergyUpdate = { [weak self] energy in
-            self?.stateQueue.async { self?.currentAudioEnergy = energy }
-        }
     }
 
     func start() {
         stateQueue.async { [weak self] in self?.applyStandbyState() }
-        audioMonitor.start()
         captureManager.startSession()
     }
 
     func stop() {
-        audioMonitor.stop()
         captureManager.stopSession()
         stateQueue.async { [weak self] in
             self?.failsafeWorkItem?.cancel()
-            self?.paddingWorkItem?.cancel()
+            self?.flightCountdownWorkItem?.cancel()
         }
     }
 
@@ -89,8 +110,14 @@ final class RecordingStateMachine: ObservableObject {
     private func applyStandbyState() {
         captureManager.setFrameRate(settings.standbyFPS)
         identifyingStartedAt = nil
-        splashDetectedAt = nil
-        splashDetector.reset()
+        processingBoardExitAt = nil
+        processingIsPersonDetected = true
+        consecutiveMissedFrames = 0
+        recordingFrameCounter = 0
+        DispatchQueue.main.async { [weak self] in
+            self?.isPersonDetectedInROI = true
+            self?.boardExitAt = nil
+        }
     }
 
     private func beginRecording() {
@@ -109,7 +136,7 @@ final class RecordingStateMachine: ObservableObject {
 
     private func finishRecording() {
         failsafeWorkItem?.cancel()
-        paddingWorkItem?.cancel()
+        flightCountdownWorkItem?.cancel()
         captureManager.stopRecording { [weak self] url in
             guard let self else { return }
             DispatchQueue.main.async { self.lastClipURL = url }
@@ -117,13 +144,22 @@ final class RecordingStateMachine: ObservableObject {
         }
     }
 
-    private func handleSplashDetected() {
-        guard processingState == .recording, splashDetectedAt == nil else { return }
-        splashDetectedAt = Date()
+    /// Called once, the moment `missedFrameThreshold` consecutive analyzed frames find nobody in
+    /// the trampoline ROI: starts the fixed flight-time countdown to the cut, and hands off from
+    /// the failsafe (now redundant — we have a precise cutoff) to that countdown.
+    private func handleBoardExit() {
+        guard processingState == .recording, processingBoardExitAt == nil else { return }
+        let now = Date()
+        processingBoardExitAt = now
+        DispatchQueue.main.async { [weak self] in
+            self?.isPersonDetectedInROI = false
+            self?.boardExitAt = now
+        }
+
         failsafeWorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.finishRecording() }
-        paddingWorkItem = work
-        stateQueue.asyncAfter(deadline: .now() + settings.postSplashPaddingSeconds, execute: work)
+        flightCountdownWorkItem = work
+        stateQueue.asyncAfter(deadline: .now() + settings.flightTimeSeconds, execute: work)
     }
 }
 
@@ -143,7 +179,7 @@ extension RecordingStateMachine: CaptureFrameDelegate {
         case .armed:
             break
         case .recording:
-            evaluateSplash(pixelBuffer: pixelBuffer)
+            evaluatePresenceWhileRecording(pixelBuffer: pixelBuffer, orientation: orientation)
         }
     }
 
@@ -186,22 +222,32 @@ extension RecordingStateMachine: CaptureFrameDelegate {
         // just briefly noisy — the timeout is what actually sends us back to `.standby`.
     }
 
-    private func evaluateSplash(pixelBuffer: CVPixelBuffer) {
-        guard splashDetectedAt == nil else { return }
+    /// Keeps running PoseDetector on the trampoline ROI while recording, so we know the moment
+    /// the diver leaves the board. Once `missedFrameThreshold` consecutive analyzed frames come
+    /// up empty, `handleBoardExit()` fires and this stops evaluating (`processingBoardExitAt`
+    /// guard below) — the fixed flight-time countdown takes over from there.
+    private func evaluatePresenceWhileRecording(pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation) {
+        guard processingBoardExitAt == nil else { return }
 
-        var visualTriggered = false
-        var audioTriggered = false
+        recordingFrameCounter += 1
+        guard recordingFrameCounter % Self.recordingFrameStride == 0 else { return }
 
-        if settings.useSplashVisualSignal {
-            let energy = splashDetector.motionEnergy(pixelBuffer: pixelBuffer, roi: settings.waterROI)
-            visualTriggered = energy >= settings.splashMotionThreshold
+        let roi = settings.trampolineROI.visionNormalized
+        let poses = poseDetector.detectPoses(in: pixelBuffer, roi: roi, orientation: orientation)
+        let detected = !poses.isEmpty
+
+        if detected != processingIsPersonDetected {
+            processingIsPersonDetected = detected
+            DispatchQueue.main.async { [weak self] in self?.isPersonDetectedInROI = detected }
         }
-        if settings.useSplashAudioSignal {
-            audioTriggered = currentAudioEnergy >= settings.splashAudioThreshold
-        }
 
-        if visualTriggered || audioTriggered {
-            handleSplashDetected()
+        if detected {
+            consecutiveMissedFrames = 0
+        } else {
+            consecutiveMissedFrames += 1
+            if consecutiveMissedFrames >= Self.missedFrameThreshold {
+                handleBoardExit()
+            }
         }
     }
 }

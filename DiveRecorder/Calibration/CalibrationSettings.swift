@@ -6,9 +6,8 @@ import Combine
 /// data (not hardcoded constants) so `CalibrationView` can expose them as live-adjustable
 /// sliders and persist changes without needing a rebuild.
 struct CalibrationSettings: Codable, Equatable {
-    // Normalized ROIs (0...1, origin top-left — UIKit view coordinates).
+    // Normalized ROI (0...1, origin top-left — UIKit view coordinates).
     var trampolineROI = CGRect(x: 0.3, y: 0.1, width: 0.4, height: 0.5)
-    var waterROI = CGRect(x: 0.1, y: 0.6, width: 0.8, height: 0.35)
 
     // Reference color, stored as an HSV hue histogram.
     var referenceHueHistogram = [Double](repeating: 0, count: ColorMatcher.hueBinCount)
@@ -21,14 +20,39 @@ struct CalibrationSettings: Codable, Equatable {
     // Identificación por color
     var colorMatchThreshold: Double = 0.35 // chi-square distance; lower = stricter
 
-    // Detección de splash
-    var useSplashVisualSignal = true
-    var splashMotionThreshold: Double = 0.12
-    var useSplashAudioSignal = true
-    var splashAudioThreshold: Double = 0.20
-    var postSplashPaddingSeconds: Double = 0.75
+    // Fin de grabación: mientras GRABANDO, PoseDetector sigue vigilando el ROI del trampolín. En
+    // cuanto deja de detectar a la persona ahí, arranca esta cuenta regresiva fija hasta cortar.
+    var flightTimeSeconds: Double = 3.5
+    // Respaldo por si nunca se detecta que salió del trampolín (ver RecordingStateMachine).
     var recordingFailsafeSeconds: Double = 7.0
     var recordingFPS: Double = 60.0
+
+    init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case trampolineROI, referenceHueHistogram, hasReferenceColor
+        case standbyFPS, identifyingTimeoutSeconds, colorMatchThreshold
+        case flightTimeSeconds, recordingFailsafeSeconds, recordingFPS
+    }
+
+    // Custom decode so settings persisted by an older build (before the splash/audio-based
+    // end-of-recording logic was replaced by the board-exit countdown) migrate gracefully: any
+    // field that still exists keeps its already-tuned value, fields that no longer exist are
+    // ignored, and new fields (flightTimeSeconds) just fall back to their default — instead of
+    // the whole decode failing and silently wiping every calibrated value back to defaults.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let defaults = CalibrationSettings()
+        trampolineROI = try container.decodeIfPresent(CGRect.self, forKey: .trampolineROI) ?? defaults.trampolineROI
+        referenceHueHistogram = try container.decodeIfPresent([Double].self, forKey: .referenceHueHistogram) ?? defaults.referenceHueHistogram
+        hasReferenceColor = try container.decodeIfPresent(Bool.self, forKey: .hasReferenceColor) ?? defaults.hasReferenceColor
+        standbyFPS = try container.decodeIfPresent(Double.self, forKey: .standbyFPS) ?? defaults.standbyFPS
+        identifyingTimeoutSeconds = try container.decodeIfPresent(Double.self, forKey: .identifyingTimeoutSeconds) ?? defaults.identifyingTimeoutSeconds
+        colorMatchThreshold = try container.decodeIfPresent(Double.self, forKey: .colorMatchThreshold) ?? defaults.colorMatchThreshold
+        flightTimeSeconds = try container.decodeIfPresent(Double.self, forKey: .flightTimeSeconds) ?? defaults.flightTimeSeconds
+        recordingFailsafeSeconds = try container.decodeIfPresent(Double.self, forKey: .recordingFailsafeSeconds) ?? defaults.recordingFailsafeSeconds
+        recordingFPS = try container.decodeIfPresent(Double.self, forKey: .recordingFPS) ?? defaults.recordingFPS
+    }
 }
 
 /// Persists `CalibrationSettings` to UserDefaults and publishes changes so both the live state
