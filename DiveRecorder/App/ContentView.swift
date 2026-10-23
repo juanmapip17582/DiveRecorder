@@ -7,6 +7,7 @@ struct ContentView: View {
 
     @State private var showingCalibration = false
     @State private var showingLibrary = false
+    @State private var didStart = false
     private let clipStorage = ClipStorage()
 
     init() {
@@ -33,10 +34,16 @@ struct ContentView: View {
                 }
                 Spacer()
                 controls
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 8)
             }
         }
         .onAppear {
+            // onAppear fires again every time a full-screen cover (Calibración) closes, so only
+            // configure the session and start the state machine the first time. There's
+            // deliberately no onDisappear → stop(): presenting Calibration as a cover would
+            // trigger it and stop the capture session underneath.
+            guard !didStart else { return }
+            didStart = true
             captureManager.requestAccessAndConfigure()
             // Give the session a moment to finish configuring before the state machine starts
             // driving frame rate changes and recording.
@@ -44,19 +51,13 @@ struct ContentView: View {
                 stateMachine.start()
             }
         }
-        .onDisappear {
-            stateMachine.stop()
-        }
-        .sheet(isPresented: $showingCalibration) {
+        .fullScreenCover(isPresented: $showingCalibration) {
             CalibrationView(calibrationStore: calibrationStore, captureManager: captureManager)
         }
         .onChange(of: showingCalibration) { isShowing in
-            // Calibration's own live preview borrows CaptureManager's single shared preview
-            // layer while its sheet is open (see CameraPreviewView) — the layer reattaches
-            // itself back to this screen the next time SwiftUI re-renders it, which already
-            // happens here since this view's body reads `showingCalibration`. This explicit,
-            // idempotent startSession() is just defensive backup in case the capture session
-            // itself (not just the preview layer) ever ends up stopped by the time we return.
+            // Each CameraPreviewView has its own preview layer on the same session, so nothing
+            // needs reattaching here. This idempotent startSession() is just a defensive backup
+            // in case the capture session ever ends up stopped by the time we return.
             if !isShowing {
                 captureManager.startSession()
             }
@@ -100,26 +101,22 @@ struct ContentView: View {
     }
 
     private var controls: some View {
-        HStack(spacing: 24) {
-            Button {
-                showingLibrary = true
-            } label: {
-                Image(systemName: "film.stack")
-                    .font(.title2)
-                    .padding(14)
-                    .background(.ultraThinMaterial, in: Circle())
-            }
-
-            Button {
-                showingCalibration = true
-            } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.title2)
-                    .padding(14)
-                    .background(.ultraThinMaterial, in: Circle())
-            }
+        HStack(spacing: 4) {
+            controlButton(systemImage: "film.stack") { showingLibrary = true }
+            controlButton(systemImage: "slider.horizontal.3") { showingCalibration = true }
         }
+        .padding(4)
+        .background(.ultraThinMaterial, in: Capsule())
         .foregroundStyle(.white)
+    }
+
+    private func controlButton(systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.body.weight(.semibold))
+                .frame(width: 44, height: 36)
+                .contentShape(Rectangle())
+        }
     }
 }
 

@@ -38,28 +38,38 @@ struct ROISelectionView: View {
             .gesture(
                 DragGesture(minimumDistance: 4)
                     .onChanged { value in
-                        if dragStart == nil { dragStart = value.startLocation }
+                        if dragStart == nil { dragStart = clamp(value.startLocation, to: geo.size) }
                         guard let start = dragStart else { return }
+                        // Clamp the finger to the view so the ROI can never extend past the image.
+                        let end = clamp(value.location, to: geo.size)
                         currentRect = CGRect(
-                            x: min(start.x, value.location.x),
-                            y: min(start.y, value.location.y),
-                            width: abs(value.location.x - start.x),
-                            height: abs(value.location.y - start.y)
+                            x: min(start.x, end.x),
+                            y: min(start.y, end.y),
+                            width: abs(end.x - start.x),
+                            height: abs(end.y - start.y)
                         )
                     }
                     .onEnded { _ in
+                        defer {
+                            dragStart = nil
+                            currentRect = nil
+                        }
                         guard let drawn = currentRect, geo.size.width > 0, geo.size.height > 0 else { return }
-                        roi = CGRect(
+                        let normalized = CGRect(
                             x: drawn.minX / geo.size.width,
                             y: drawn.minY / geo.size.height,
                             width: drawn.width / geo.size.width,
                             height: drawn.height / geo.size.height
                         )
-                        dragStart = nil
-                        currentRect = nil
+                        // Too small/degenerate (e.g. a tap) → keep the previous ROI.
+                        if let clamped = normalized.clampedToUnit() { roi = clamped }
                     }
             )
         }
+    }
+
+    private func clamp(_ point: CGPoint, to size: CGSize) -> CGPoint {
+        CGPoint(x: min(max(point.x, 0), size.width), y: min(max(point.y, 0), size.height))
     }
 
     private func displayRect(in size: CGSize) -> CGRect {

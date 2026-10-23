@@ -13,12 +13,6 @@ protocol CaptureFrameDelegate: AnyObject {
 final class CaptureManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
 
-    /// Single preview layer shared by every screen that shows the live camera feed (the
-    /// recording screen, and Calibration's own ROI-drawing preview). `CameraPreviewView`
-    /// reparents this same layer into whichever host view is currently on screen instead of
-    /// each screen creating its own layer/connection — see the comment there for why.
-    let previewLayer: AVCaptureVideoPreviewLayer
-
     weak var frameDelegate: CaptureFrameDelegate?
 
     @Published private(set) var isRecording = false
@@ -32,12 +26,6 @@ final class CaptureManager: NSObject, ObservableObject {
     private var videoDevice: AVCaptureDevice?
     private var recordingCompletion: ((URL?) -> Void)?
     private var singleFrameCompletion: ((CVPixelBuffer?) -> Void)?
-
-    override init() {
-        previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.videoGravity = .resizeAspectFill
-        super.init()
-    }
 
     func requestAccessAndConfigure() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in

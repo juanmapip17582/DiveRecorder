@@ -1,48 +1,32 @@
 import SwiftUI
 import AVFoundation
 
-/// Hosts `CaptureManager`'s single shared `AVCaptureVideoPreviewLayer`, reparenting it as a
-/// sublayer into whichever `CameraPreviewView` is currently on screen (the recording screen, or
-/// Calibration's own live preview while its sheet is open).
+/// Live camera preview for `CaptureManager`'s session. Each instance owns its own
+/// `AVCaptureVideoPreviewLayer` (as the backing layer of its host view) connected to the same
+/// shared `AVCaptureSession` — the standard, cheap way to show one session in several places.
 ///
-/// This used to be one independent `AVCaptureVideoPreviewLayer` per screen. That caused two
-/// problems: opening Calibration created a brand-new layer and negotiated a brand-new
-/// AVFoundation connection to the running session every time, which is the several-seconds
-/// delay reported when opening it; and closing Calibration left the recording screen's own
-/// preview layer as it always was — but nothing ever explicitly re-confirmed it was still
-/// attached, and it could end up black until a full relaunch. Reusing one already-connected
-/// layer makes switching between screens an instant CALayer reparent (no new connection), and
-/// `attach(_:)` re-claims it from scratch (checking the actual current superlayer, not a cached
-/// assumption) every time either screen's view appears — so the recording screen reliably gets
-/// it back when Calibration's sheet closes.
+/// This used to reparent a single shared preview layer between screens, but SwiftUI doesn't
+/// call `updateUIView` when a sheet/cover closes (the `captureManager` reference is unchanged),
+/// so the layer stayed in the dismissed Calibration view and the main screen went black.
 struct CameraPreviewView: UIViewRepresentable {
     let captureManager: CaptureManager
 
-    func makeUIView(context: Context) -> HostView {
-        let view = HostView()
-        view.attach(captureManager.previewLayer)
+    func makeUIView(context: Context) -> PreviewView {
+        let view = PreviewView()
+        view.previewLayer.session = captureManager.session
+        view.previewLayer.videoGravity = .resizeAspectFill
         return view
     }
 
-    func updateUIView(_ uiView: HostView, context: Context) {
-        uiView.attach(captureManager.previewLayer)
+    func updateUIView(_ uiView: PreviewView, context: Context) {
+        if uiView.previewLayer.session !== captureManager.session {
+            uiView.previewLayer.session = captureManager.session
+        }
     }
 
-    final class HostView: UIView {
-        private weak var hostedLayer: AVCaptureVideoPreviewLayer?
+    final class PreviewView: UIView {
+        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
 
-        func attach(_ previewLayer: AVCaptureVideoPreviewLayer) {
-            if previewLayer.superlayer !== layer {
-                previewLayer.removeFromSuperlayer()
-                layer.addSublayer(previewLayer)
-            }
-            hostedLayer = previewLayer
-            previewLayer.frame = bounds
-        }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            hostedLayer?.frame = bounds
-        }
+        var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
     }
 }

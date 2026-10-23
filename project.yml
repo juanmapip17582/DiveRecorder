@@ -20,11 +20,24 @@ targets:
           - "Resources/Info.plist"
     info:
       path: DiveRecorder/Resources/Info.plist
+      # Sin estas propiedades, `xcodegen generate` reescribe el Info.plist vacío y la app pierde
+      # los textos de permisos (iOS la mata al pedir cámara/Fotos).
+      properties:
+        CFBundleDevelopmentRegion: es
+        CFBundleDisplayName: DiveRecorder
+        LSRequiresIPhoneOS: true
+        NSCameraUsageDescription: DiveRecorder necesita la cámara para grabar automáticamente tus clavados durante el entrenamiento.
+        NSPhotoLibraryAddUsageDescription: DiveRecorder guarda tus clavados en Fotos cuando tocas "Descargar" en un clip.
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities: [arm64]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIViewControllerBasedStatusBarAppearance: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.juanma.diverecorder
         PRODUCT_NAME: DiveRecorder
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 5HLWRZU96S
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     schemes:

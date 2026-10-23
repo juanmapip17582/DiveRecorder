@@ -7,7 +7,8 @@ import Combine
 /// sliders and persist changes without needing a rebuild.
 struct CalibrationSettings: Codable, Equatable {
     // Normalized ROI (0...1, origin top-left — UIKit view coordinates).
-    var trampolineROI = CGRect(x: 0.3, y: 0.1, width: 0.4, height: 0.5)
+    static let defaultTrampolineROI = CGRect(x: 0.3, y: 0.1, width: 0.4, height: 0.5)
+    var trampolineROI = CalibrationSettings.defaultTrampolineROI
 
     // Reference color, stored as an HSV hue histogram.
     var referenceHueHistogram = [Double](repeating: 0, count: ColorMatcher.hueBinCount)
@@ -43,7 +44,9 @@ struct CalibrationSettings: Codable, Equatable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let defaults = CalibrationSettings()
-        trampolineROI = try container.decodeIfPresent(CGRect.self, forKey: .trampolineROI) ?? defaults.trampolineROI
+        // Clamp on load: an older build could save a ROI drawn past the edges of the preview.
+        let storedROI = try container.decodeIfPresent(CGRect.self, forKey: .trampolineROI)
+        trampolineROI = storedROI?.clampedToUnit() ?? defaults.trampolineROI
         referenceHueHistogram = try container.decodeIfPresent([Double].self, forKey: .referenceHueHistogram) ?? defaults.referenceHueHistogram
         hasReferenceColor = try container.decodeIfPresent(Bool.self, forKey: .hasReferenceColor) ?? defaults.hasReferenceColor
         standbyFPS = try container.decodeIfPresent(Double.self, forKey: .standbyFPS) ?? defaults.standbyFPS

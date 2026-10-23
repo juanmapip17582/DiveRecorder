@@ -16,13 +16,11 @@
 		64FBE1497A99810DC1AF068D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F65347D411DC020B7EA9A3D /* Geometry.swift */; };
 		7E3335F69332689F95CA82FE /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F41590E1737E8A104352D7 /* CalibrationView.swift */; };
 		82F95F42A5EF2096AD8B8942 /* ClipStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF367D2F554ACAAD9CAED0 /* ClipStorage.swift */; };
-		8E6F97090137F01E5C0C80D5 /* AudioMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */; };
 		AA8C571BB2171E8354A6F91E /* RecordingStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C06B44CEFB880A88FFD5093A /* RecordingStateMachine.swift */; };
 		B2BDA171F0BB67B52FCA825E /* ROISelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D4BCAA6D2FCE8C31C19677 /* ROISelectionView.swift */; };
 		BAA545B71B2836861CB1BFD2 /* DiveRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FABB439714886B45FBE4FEA /* DiveRecorderApp.swift */; };
 		C60DFE5BB347241123350047 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F2772E4568344F4C86274F67 /* Assets.xcassets */; };
 		D0A143DDEE2C3AF15DA266EF /* CalibrationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED787CCB512FC95611ED7E4C /* CalibrationSettings.swift */; };
-		E6A255AD5268D71BC947F66C /* SplashDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45E0906C088037B47653550 /* SplashDetector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,8 +36,6 @@
 		8F65347D411DC020B7EA9A3D /* Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
 		BE73173A0387FDDF36835175 /* ColorMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorMatcher.swift; sourceTree = "<group>"; };
 		C06B44CEFB880A88FFD5093A /* RecordingStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingStateMachine.swift; sourceTree = "<group>"; };
-		D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMonitor.swift; sourceTree = "<group>"; };
-		E45E0906C088037B47653550 /* SplashDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashDetector.swift; sourceTree = "<group>"; };
 		ED787CCB512FC95611ED7E4C /* CalibrationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationSettings.swift; sourceTree = "<group>"; };
 		F2772E4568344F4C86274F67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FDDF367D2F554ACAAD9CAED0 /* ClipStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipStorage.swift; sourceTree = "<group>"; };
@@ -89,14 +85,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4B0ACF43B9D72125745864C9 /* SplashDetection */ = {
-			isa = PBXGroup;
-			children = (
-				E45E0906C088037B47653550 /* SplashDetector.swift */,
-			);
-			path = SplashDetection;
-			sourceTree = "<group>";
-		};
 		522DD8A65DC95C8074481A50 /* Vision */ = {
 			isa = PBXGroup;
 			children = (
@@ -109,7 +97,6 @@
 		5C0C30C0EA9275FA100BA45B /* Camera */ = {
 			isa = PBXGroup;
 			children = (
-				D9CF1415F8019BE6501AE46B /* AudioMonitor.swift */,
 				464420CDCB48531B07D19480 /* CaptureManager.swift */,
 			);
 			path = Camera;
@@ -149,7 +136,6 @@
 				5C0C30C0EA9275FA100BA45B /* Camera */,
 				6008289FA06E1035E2428B4C /* Library */,
 				263480C46F5ED02442BF8726 /* Resources */,
-				4B0ACF43B9D72125745864C9 /* SplashDetection */,
 				E1E314CD9CC9B70F4AACE828 /* StateMachine */,
 				B8F865104841A5574B4C8732 /* Supporting */,
 				522DD8A65DC95C8074481A50 /* Vision */,
@@ -188,6 +174,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					533754748D96E4CC4EBD5E4D = {
+						DevelopmentTeam = 5HLWRZU96S;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -227,7 +214,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E6F97090137F01E5C0C80D5 /* AudioMonitor.swift in Sources */,
 				D0A143DDEE2C3AF15DA266EF /* CalibrationSettings.swift in Sources */,
 				7E3335F69332689F95CA82FE /* CalibrationView.swift in Sources */,
 				05EAB9B06C480EA7C6AB6542 /* CameraPreviewView.swift in Sources */,
@@ -241,7 +227,6 @@
 				62CE47F9C1E34AEA88A053C1 /* PoseDetector.swift in Sources */,
 				B2BDA171F0BB67B52FCA825E /* ROISelectionView.swift in Sources */,
 				AA8C571BB2171E8354A6F91E /* RecordingStateMachine.swift in Sources */,
-				E6A255AD5268D71BC947F66C /* SplashDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,6 +240,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5HLWRZU96S;
 				INFOPLIST_FILE = DiveRecorder/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -396,6 +382,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5HLWRZU96S;
 				INFOPLIST_FILE = DiveRecorder/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
