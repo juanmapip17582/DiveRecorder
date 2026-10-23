@@ -18,30 +18,24 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
+            // The app's only camera preview: never unmounted or recreated (see CameraPreviewView).
             CameraPreviewView(captureManager: captureManager)
                 .ignoresSafeArea()
 
-            VStack {
-                statusBadge
-                    .padding(.top, 60)
-                if stateMachine.state == .recording {
-                    RecordingDebugOverlay(
-                        isPersonDetected: stateMachine.isPersonDetectedInROI,
-                        boardExitAt: stateMachine.boardExitAt,
-                        flightTimeSeconds: calibrationStore.settings.flightTimeSeconds
-                    )
-                    .padding(.top, 8)
+            if showingCalibration {
+                CalibrationView(calibrationStore: calibrationStore, captureManager: captureManager) {
+                    showingCalibration = false
                 }
-                Spacer()
-                controls
-                    .padding(.bottom, 8)
+                .transition(.opacity)
+            } else {
+                mainOverlay
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: showingCalibration)
         .onAppear {
-            // onAppear fires again every time a full-screen cover (Calibración) closes, so only
-            // configure the session and start the state machine the first time. There's
-            // deliberately no onDisappear → stop(): presenting Calibration as a cover would
-            // trigger it and stop the capture session underneath.
+            // Only configure the session and start the state machine once, even if onAppear
+            // fires again.
             guard !didStart else { return }
             didStart = true
             captureManager.requestAccessAndConfigure()
@@ -51,16 +45,9 @@ struct ContentView: View {
                 stateMachine.start()
             }
         }
-        .fullScreenCover(isPresented: $showingCalibration) {
-            CalibrationView(calibrationStore: calibrationStore, captureManager: captureManager)
-        }
         .onChange(of: showingCalibration) { isShowing in
-            // Each CameraPreviewView has its own preview layer on the same session, so nothing
-            // needs reattaching here. This idempotent startSession() is just a defensive backup
-            // in case the capture session ever ends up stopped by the time we return.
-            if !isShowing {
-                captureManager.startSession()
-            }
+            // No arming/recording while calibrating; the session itself keeps running.
+            stateMachine.setPaused(isShowing)
         }
         .sheet(isPresented: $showingLibrary) {
             ClipLibraryView(clipStorage: clipStorage)
@@ -69,6 +56,25 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Activa el acceso a la cámara en Ajustes para usar DiveRecorder.")
+        }
+    }
+
+    /// Badge + buttons; hidden while Calibración is open.
+    private var mainOverlay: some View {
+        VStack {
+            statusBadge
+                .padding(.top, 60)
+            if stateMachine.state == .recording {
+                RecordingDebugOverlay(
+                    isPersonDetected: stateMachine.isPersonDetectedInROI,
+                    boardExitAt: stateMachine.boardExitAt,
+                    flightTimeSeconds: calibrationStore.settings.flightTimeSeconds
+                )
+                .padding(.top, 8)
+            }
+            Spacer()
+            controls
+                .padding(.bottom, 8)
         }
     }
 

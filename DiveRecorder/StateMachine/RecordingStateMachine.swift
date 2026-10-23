@@ -38,6 +38,8 @@ final class RecordingStateMachine: ObservableObject {
     private let stateQueue = DispatchQueue(label: "com.diverecorder.statemachine")
 
     private var processingState: DiveRecorderState = .standby
+    /// While true (Calibración open) frames are ignored, so nothing gets armed or recorded.
+    private var isPaused = false
     private var identifyingStartedAt: Date?
     private var failsafeWorkItem: DispatchWorkItem?
     private var flightCountdownWorkItem: DispatchWorkItem?
@@ -92,6 +94,28 @@ final class RecordingStateMachine: ObservableObject {
         }
     }
 
+    /// Pauses/resumes detection without stopping the capture session (the preview keeps
+    /// running underneath Calibración). Pausing mid-recording cuts and saves the clip.
+    func setPaused(_ paused: Bool) {
+        stateQueue.async { [weak self] in
+            guard let self, self.isPaused != paused else { return }
+            self.isPaused = paused
+            if paused {
+                if self.processingState == .recording {
+                    self.finishRecording()
+                } else {
+                    self.enter(.standby)
+                }
+                // Smooth preview while drawing the ROI, instead of the throttled standby fps.
+                self.captureManager.setFrameRate(Self.calibrationPreviewFPS)
+            } else {
+                self.applyStandbyState()
+            }
+        }
+    }
+
+    private static let calibrationPreviewFPS = 30.0
+
     // MARK: - Transitions (stateQueue only)
 
     private func enter(_ newState: DiveRecorderState) {
@@ -108,7 +132,8 @@ final class RecordingStateMachine: ObservableObject {
     }
 
     private func applyStandbyState() {
-        captureManager.setFrameRate(settings.standbyFPS)
+        // finishRecording() lands here too; keep the calibration fps if paused meanwhile.
+        if !isPaused { captureManager.setFrameRate(settings.standbyFPS) }
         identifyingStartedAt = nil
         processingBoardExitAt = nil
         processingIsPersonDetected = true
@@ -171,6 +196,7 @@ extension RecordingStateMachine: CaptureFrameDelegate {
     }
 
     private func process(pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation) {
+        guard !isPaused else { return }
         switch processingState {
         case .standby:
             evaluateStandby(pixelBuffer: pixelBuffer, orientation: orientation)

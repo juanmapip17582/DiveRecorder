@@ -1,13 +1,13 @@
 import SwiftUI
 import AVFoundation
 
-/// Live camera preview for `CaptureManager`'s session. Each instance owns its own
-/// `AVCaptureVideoPreviewLayer` (as the backing layer of its host view) connected to the same
-/// shared `AVCaptureSession` — the standard, cheap way to show one session in several places.
+/// Live camera preview for `CaptureManager`'s session, backed by its own
+/// `AVCaptureVideoPreviewLayer`.
 ///
-/// This used to reparent a single shared preview layer between screens, but SwiftUI doesn't
-/// call `updateUIView` when a sheet/cover closes (the `captureManager` reference is unchanged),
-/// so the layer stayed in the dismissed Calibration view and the main screen went black.
+/// Use exactly ONE of these, kept mounted for the app's lifetime (ContentView's). Connecting a
+/// second preview layer to the same session (as Calibration used to) blocks the main thread
+/// for seconds while AVFoundation reconfigures, interrupts the session, and detaches the
+/// first layer — measured at ~9 s with `previewLayer.session` going nil on the main layer.
 struct CameraPreviewView: UIViewRepresentable {
     let captureManager: CaptureManager
 

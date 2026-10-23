@@ -7,49 +7,42 @@ import CoreVideo
 /// "measure in the real pool, don't guess" — all persisted immediately via `CalibrationStore`,
 /// no rebuild needed to iterate.
 ///
-/// Presented full screen: the camera takes most of the screen (so the ROI is easy to draw) and
-/// the settings live in a compact, collapsible bottom panel.
+/// Shown as an overlay inside ContentView, on top of its one and only CameraPreviewView — it
+/// deliberately has no preview of its own. Attaching a second AVCaptureVideoPreviewLayer to the
+/// session blocked the main thread ~9 s and detached the main screen's layer (iOS only keeps
+/// one preview layer connected per session).
 struct CalibrationView: View {
     @ObservedObject var calibrationStore: CalibrationStore
     @ObservedObject var captureManager: CaptureManager
-
-    @Environment(\.dismiss) private var dismiss
+    let onDone: () -> Void
 
     @State private var captureFeedback: String?
     @State private var panelExpanded = false
 
     private let poseDetector = PoseDetector()
 
-    /// Portrait 1920x1080 buffers (see CaptureManager). Showing the preview at exactly this
-    /// aspect ratio with aspect-fill means nothing is cropped, so the ROI's view-normalized
-    /// coordinates are the same as image-normalized coordinates used by Vision.
+    /// Portrait 1920x1080 buffers (see CaptureManager). ROISelectionView maps the ROI through
+    /// the same aspect-fill crop the main preview applies, so it matches what Vision sees.
     private static let cameraAspectRatio: CGFloat = 1080.0 / 1920.0
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                cameraArea
-                Spacer(minLength: 0)
-            }
+            // Same full-screen frame as ContentView's CameraPreviewView, so the mapping matches.
+            ROISelectionView(
+                title: "Trampolín",
+                roi: $calibrationStore.settings.trampolineROI,
+                overlayColor: .yellow,
+                imageAspectRatio: Self.cameraAspectRatio
+            )
+            .ignoresSafeArea()
 
             settingsPanel
         }
         .overlay(alignment: .top) { topBar }
-        .preferredColorScheme(.dark)
+        .environment(\.colorScheme, .dark)
     }
 
-    // MARK: - Camera + ROI
-
-    private var cameraArea: some View {
-        ZStack {
-            CameraPreviewView(captureManager: captureManager)
-            ROISelectionView(title: "Trampolín", roi: $calibrationStore.settings.trampolineROI, overlayColor: .yellow)
-        }
-        .aspectRatio(Self.cameraAspectRatio, contentMode: .fit)
-        .frame(maxWidth: .infinity)
-    }
+    // MARK: - Top bar
 
     private var topBar: some View {
         HStack(spacing: 8) {
@@ -70,7 +63,7 @@ struct CalibrationView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
 
-            Button("Listo") { dismiss() }
+            Button("Listo", action: onDone)
                 .font(.subheadline.bold())
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
